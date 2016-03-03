@@ -9,12 +9,17 @@ IOperatingMode* StartupMode::handleRequest(WebRequest* webHandler, String reques
 {
   if(request.indexOf("/scanning/beacon") != -1)
   {
-    webHandler->completeResponse(webHandler->createJSONResponse("BEACON_RESPONSE", "UP", "OK", ""));
+    webHandler->sendResponse(webHandler->createJSONResponse("BEACON_RESPONSE", "UP", "OK", ""));
+    return NULL;
+  }
+  else if(request.indexOf("/scanning/test") != -1)
+  {
+    webHandler->completeResponse("Hello there");
     return NULL;
   }
   else if(request.indexOf("/settings/set/mode/ledhandler") != -1)
   {
-    webHandler->completeResponse(webHandler->createJSONResponse("CHANGE_STATE", "LED_HANDLER", "OK", ""));
+    webHandler->sendResponse(webHandler->createJSONResponse("CHANGE_STATE", "LED_HANDLER", "OK", ""));
     
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();

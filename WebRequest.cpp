@@ -22,7 +22,7 @@ WebRequest::WebRequest(const char* ssid, const char* password)
 
 String WebRequest::receiveRequest()
 {
-  WiFiClient client = server->available();
+  this->client = server->available();
   if (!client) {
     return "NO CLIENT";
   }
@@ -44,16 +44,22 @@ String WebRequest::receiveRequest()
 
 String WebRequest::createHeaders()
 {
-  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Headers: Content-Type\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Origin: *\r\n\r\n<!DOCTYPE HTML>\r\n<html> ";
+  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Headers: Content-Type\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Origin: *\r\n\r\n ";
   return s;
 }
 
 void WebRequest::completeResponse(String partialResponse)
 {
   //TODO controllare se chiamare client.flush() qui va bene
+  String completeResponse = "<!DOCTYPE HTML>\r\n<html>" + partialResponse + "</html>\n";
+  this->sendResponse(completeResponse);
+}
+
+void WebRequest::sendResponse(String completeResponse)
+{
+  String withHeaders = createHeaders() + completeResponse;
+  client.print(withHeaders);
   client.flush();
-  String completeResponse = createHeaders() + partialResponse + "</html>\n";
-  client.print(completeResponse);
 }
 
 String WebRequest::createJSONResponse(String type, String value, String stat, String extras)

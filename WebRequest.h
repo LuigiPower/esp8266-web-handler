@@ -13,7 +13,8 @@ class WebRequest
 
 public:
   WebRequest(const char* ssid, const char* password);
-  
+
+  virtual void sendResponse(String completeResponse);
   virtual void completeResponse(String partialResponse);
   virtual String createJSONResponse(String type, String value, String stat, String extras);
   /**
