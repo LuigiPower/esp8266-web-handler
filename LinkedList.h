@@ -8,9 +8,10 @@ class LinkedList
     LinkedList<T>* succ;
     LinkedList<T>* prev;
     T value;
-    
+
   public:
     LinkedList();
+    LinkedList(T val);
     ~LinkedList();
 
     /**
@@ -22,7 +23,7 @@ class LinkedList
      * Inserts new element after this one
      */
     virtual void insert(T value);
-    
+
     /**
      * Removes current element from list
      */
