@@ -23,6 +23,14 @@ public:
    * @return String request
    */
   virtual String receiveRequest();
+
+  /**
+   * Splits the request
+   * @param request request to split
+   * @param paramCount where to store the paramCount
+   * @return String array
+   */
+  virtual String* splitRequest(String request, int* paramCount);
 };
 
 #endif
