@@ -1,3 +1,5 @@
+#! python
+
 import netifaces
 import httplib
 import socket
@@ -14,6 +16,12 @@ API_KEY = "AIzaSyAh1LQr0p_0qB6b4RKhrMr_nxPtjxZfqiI"
 PORT_NUMBER = 5575
 app = Flask(__name__)
 ################################################################################
+
+GPIO = "GPIO"
+
+commands = {
+
+}
 
 def getLocalIPs():
     local_ip_addresses = []
@@ -186,7 +194,7 @@ def get_node_list():
                     },
                 "esp1": {
                     "ip": "192.168.1.74",
-                    "mode": "empty_mode"
+                    "mode": "gpio_mode"
                     }
             }
 

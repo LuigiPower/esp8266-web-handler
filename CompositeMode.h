@@ -6,11 +6,13 @@
 
 class CompositeMode : public IOperatingMode
 {
-    LinkedList<IOperatingMode> modeList;
+    LinkedList<IOperatingMode*>* modeList;
 
     public:
         virtual void init(IOTNode* node, JsonObject& json_data);
         virtual IOperatingMode* handleRequest(WebRequest* webHandler, String request);
+
+        virtual void addMode(IOperatingMode* mode);
 };
 
 #endif

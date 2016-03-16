@@ -33,6 +33,11 @@ class LinkedList
      * Sets current node value
      */
      virtual T set(T newvalue);
+
+     /**
+      * Gets current node value
+      */
+     virtual T get();
 };
 
 #endif

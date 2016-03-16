@@ -78,3 +78,9 @@ T LinkedList<T>::set(T newvalue)
     return oldvalue;
 }
 
+template <class T>
+T LinkedList<T>::get()
+{
+    return this->value;
+}
+
