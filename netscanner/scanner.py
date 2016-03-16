@@ -190,17 +190,54 @@ def get_node_list():
     esplist = {
                 "esp0": {
                     "ip": "192.168.1.14",
-                    "mode": "empty_mode"
-                    },
+                    "mode": {
+                        "name": "gpio_mode",
+                        "params": {
+                            "gpio": 2
+                        }
+                    }
+                },
                 "esp1": {
                     "ip": "192.168.1.74",
-                    "mode": "gpio_mode"
+                    "mode": {
+                        "name": "composite_mode",
+                        "params": {
+                            "modes": [
+                                {
+                                    "name": "gpio_mode",
+                                    "params": {
+                                        "gpio": 1
+                                    }
+                                },
+                                {
+                                    "name": "composite_mode",
+                                    "params": {
+                                        "modes": [
+                                            {
+                                                "name": "gpio_mode",
+                                                "params": {
+                                                    "gpio": 2
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "sticazzi_mode",
+                                    "params": {
+                                        "sticazziparams": 42
+                                    }
+                                }
+                            ]
+                        }
                     }
+                }
             }
 
     tosend = []
 
     for esp in esplist:
+        print "ESP: %s" % esp
         node = esplist[esp]
         tosend.append({ "name": esp, "ip": node['ip'], "mode": node['mode'] })
 
