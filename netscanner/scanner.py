@@ -36,7 +36,7 @@ def scanLocalIPs(iplist):
 
     for ip in iplist:
         try:
-            conn = httplib.HTTPConnection(ip, PORT_NUMBER, timeout=0.05)
+            conn = httplib.HTTPConnection(ip, PORT_NUMBER, timeout=0.1)
             conn.request("GET", "/scanning/beacon")
             response = conn.getresponse()
             #print "GET REQUEST to %s response: %s" % (ip, response.read())
@@ -56,6 +56,8 @@ def setESPMode(ip, mode):
 
 listOfIPs = getLocalIPList()
 esplist = scanLocalIPs(listOfIPs)
+
+print esplist
 
 if "esp0" in esplist:
     setESPMode(esplist["esp0"], "ledhandler")
