@@ -67,6 +67,8 @@ def scan_local_ips(iplist):
         try:
             conn = httplib.HTTPConnection(ip, PORT_NUMBER, timeout=0.1)
             conn.request("GET", "/scanning/beacon")
+            #TODO fare un POST invece di GET, inviando l'ip del server
+            #TODO l'ip del server dovrebbe corrispondere all'interfaccia corretta...
             response = conn.getresponse()
 
             response.read()
@@ -90,51 +92,51 @@ def send_command(ip, command):
 ################################################################################
 
 esplist = {
-                    "esp0": {
-                        "ip": "192.168.1.14",
-                        "mode": {
+        "esp0": {
+            "ip": "192.168.1.14",
+            "mode": {
+                "name": "gpio_mode",
+                "params": {
+                    "gpio": 2
+                }
+            }
+        },
+        "esp1": {
+            "ip": "192.168.1.74",
+            "mode": {
+                "name": "composite_mode",
+                "params": {
+                    "modes": [
+                        {
                             "name": "gpio_mode",
                             "params": {
-                                "gpio": 2
+                                "gpio": 1
                             }
-                        }
-                    },
-                    "esp1": {
-                        "ip": "192.168.1.74",
-                        "mode": {
+                        },
+                        {
                             "name": "composite_mode",
                             "params": {
                                 "modes": [
                                     {
                                         "name": "gpio_mode",
                                         "params": {
-                                            "gpio": 1
-                                        }
-                                    },
-                                    {
-                                        "name": "composite_mode",
-                                        "params": {
-                                            "modes": [
-                                                {
-                                                    "name": "gpio_mode",
-                                                    "params": {
-                                                        "gpio": 2
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "name": "sticazzi_mode",
-                                        "params": {
-                                            "sticazziparams": 42
+                                            "gpio": 2
                                         }
                                     }
                                 ]
                             }
+                        },
+                        {
+                            "name": "sticazzi_mode",
+                            "params": {
+                                "sticazziparams": 42
+                            }
                         }
-                    }
+                    ]
                 }
+            }
+        }
+    }
 
 
 
