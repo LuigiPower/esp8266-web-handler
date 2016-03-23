@@ -29,6 +29,18 @@
 
         <md-content layout="column" layout-align="center center" id="main-area">
             Hello there!
+
+            <div ng-repeat="node in dataFromPython">
+                hi
+                <iot-node node_data="node"></iot-node>
+            </div>
+
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
             {{dataFromPython|angular}}
 
 
