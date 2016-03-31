@@ -1,40 +1,45 @@
 (function(){
-    "use strict";
+   "use strict";
 
-    var app = angular.module("utility-module", []);
+   var app = angular.module("utility-module", []);
 
-    app.service("utility-service", [ "$mdToast", function($mdToast) {
-        var context = this;
+   app.service("utility-service", [ "$mdToast", function($mdToast) {
+      var context = this;
 
-        this.loadFile = function(mimetype, e, callback) {
-            var file = e.target.files[0];
-            if(!file)
-            {
-                return;
-            }
+      this.gpio = "gpio_mode";
+      this.composite = "composite_mode";
+      this.empty = "empty_mode";
+      this.unknown = "unknown_mode";
 
-            var reader = new FileReader();
-            reader.onload = callback;
+      this.loadFile = function(mimetype, e, callback) {
+         var file = e.target.files[0];
+         if(!file)
+         {
+            return;
+         }
 
-            if(mimetype == "audio/wav")
-            {
-                reader.readAsDataURL(file);
-            }
-            else
-            {
-                reader.readAsText(file);
-            }
-        };
+         var reader = new FileReader();
+         reader.onload = callback;
 
-        this.showToast = function(message)
-        {
-            console.log("SHOWING TOAST...");
-            $mdToast.show($mdToast.simple()
-                    .content("sticapperi")
-                    .textContent(message)
-                    .position('bottom right')
-                    .hideDelay(3000));
-        };
-    }]);
+         if(mimetype == "audio/wav")
+         {
+            reader.readAsDataURL(file);
+         }
+         else
+         {
+            reader.readAsText(file);
+         }
+      };
+
+      this.showToast = function(message)
+      {
+         console.log("SHOWING TOAST...");
+         $mdToast.show($mdToast.simple()
+               .content("sticapperi")
+               .textContent(message)
+               .position('bottom right')
+               .hideDelay(3000));
+      };
+   }]);
 
 })();

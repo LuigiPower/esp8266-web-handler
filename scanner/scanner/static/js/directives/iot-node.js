@@ -6,10 +6,10 @@
     app.directive("iotNode", function() {
         return {
             controller: "IotNodeController",
-            templateUrl: "templates/iot-node-template.html",
+            templateUrl: "/static/angular-templates/iot-node-template.html",
             restrict: "E",
             scope: {
-                node_data: "="
+                nodeData: "=node"
             }
         };
     });

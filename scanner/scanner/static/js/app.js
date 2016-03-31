@@ -3,7 +3,7 @@
 
 	var app = angular.module('iotscanner', [
 		'ngMaterial', 'session-module', 'utility-module',
-                'python-module'
+                'python-module', 'iot-module'
 	]);
 
 	app.config(function($mdThemingProvider){

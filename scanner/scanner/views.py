@@ -44,6 +44,12 @@ def show_node_list():
     tosend = get_node_list()
     return json.dumps(tosend)
 
+@app.route('/node/<nodeid>/<action>')
+def send_action_to_node(nodeid, action):
+    print "Sending %s to %s" % (action, nodeid)
+    #TODO send it to the actual node
+    return "Sent"
+
 @app.route('/init/testdata')
 def load_test():
     return json.dumps(init_test_data())

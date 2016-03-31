@@ -97,7 +97,8 @@ esplist = {
             "mode": {
                 "name": "gpio_mode",
                 "params": {
-                    "gpio": 2
+                    "gpio": 2,
+                    "status": 1
                 }
             }
         },
@@ -110,7 +111,8 @@ esplist = {
                         {
                             "name": "gpio_mode",
                             "params": {
-                                "gpio": 1
+                                "gpio": 1,
+                                "status": 1
                             }
                         },
                         {
@@ -120,7 +122,8 @@ esplist = {
                                     {
                                         "name": "gpio_mode",
                                         "params": {
-                                            "gpio": 2
+                                            "gpio": 2,
+                                            "status": 0
                                         }
                                     }
                                 ]
