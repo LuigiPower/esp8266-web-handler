@@ -3,6 +3,7 @@ from scanner.mongo import get_gcm_list
 from scanner.mongo import insert_gcm
 from scanner.iotnodes import Scanner
 from scanner.iotnodes import IoTNode
+from scanner.iotgcm import Notifier
 from flask import request
 from flask import render_template
 import time
@@ -45,7 +46,11 @@ def send_test_message():
 
     notifier.send_message(reg_id_list, {
             'message': "I'm a GCM message!",
-            'event': "VALUE_CHANGED"
+            'data': {
+                'event': {
+                    'type': "VALUE_CHANGED"
+                }
+            }
         })
     return "Test message sent"
 

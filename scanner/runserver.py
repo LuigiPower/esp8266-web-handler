@@ -26,7 +26,7 @@ def start_handler_thread():
     handler.start()
 
 #TODO weird thread behaviour, is it calling start_flask twice?
-start_handler_thread()
+#start_handler_thread()
 start_flask()
 running = False
 
