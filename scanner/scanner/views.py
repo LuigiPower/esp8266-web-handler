@@ -13,6 +13,11 @@ import json
 iotscanner = Scanner(init_test = True)
 notifier = Notifier()
 
+@app.route('/kill/scanner')
+def kill_scanner():
+    iotscanner.stop_handler_thread()
+    return "killed..."
+
 ################################################################################
 # NETWORK SCAN
 ################################################################################
@@ -58,7 +63,7 @@ def send_test_message():
 
 @app.route('/node/list', methods=['GET'])
 def show_node_list():
-    tosend = get_node_list()
+    tosend = iotscanner.get_node_list()
     return json.dumps(tosend)
 
 @app.route('/node/<nodeid>/<action>')

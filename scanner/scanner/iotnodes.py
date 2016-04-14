@@ -3,6 +3,10 @@ import httplib
 from netaddr import IPNetwork
 from netaddr import IPAddress
 from netaddr import iter_iprange
+from threading import Thread
+from iotgcm import Notifier
+from iotgcm import Event
+from time import sleep
 
 ################################################################################
 # NODE INITIALIZATION
@@ -22,15 +26,25 @@ class IOperatingMode(object):
         self.name = name
         self.parameters = parameters
 
+    def update_data(self):
+        print "Updating data of %s" % str(self)
+        pass
+
     def set_node_reference(self, noderef):
+        print "Set node reference to %s" % noderef
         self.noderef = noderef
 
-    def set_parameter(self, key, value):
+    def set_parameter(self, key, value, notify = True):
         """ Set specified parameter to value
         Also notifies any observers
         """
         #TODO notify iotnode so that I can do stuff about it (GCM message, IFTTT....)
+        oldvalue = self.parameters[key]
         self.parameters[key] = value
+
+        if notify:
+            event = Event(self.noderef, self, Event.VALUE_CHANGED, [key], [oldvalue], [value])
+            Scanner.notifier.add_event(event)
 
     def get_parameter(self, parameter):
         """ Get specified parameter """
@@ -46,6 +60,7 @@ class IOperatingMode(object):
     def to_json(self):
         return json.dumps(self.to_dict())
 
+
 class BasicMode(IOperatingMode):
     """ Basic Mode
     Allows
@@ -56,6 +71,16 @@ class BasicMode(IOperatingMode):
     def __init__(self):
         super(BasicMode, self).__init__(name = "basic_mode", parameters = {})
 
+    def update_data(self):
+        super(BasicMode, self).update_data()
+        try:
+            self.noderef.send_command("/scanning/beacon")
+        except:
+            #Node is dead?
+            #TODO notify DISCONNECTED
+            pass
+
+
 class EmptyMode(IOperatingMode):
     """ Empty Mode
     Allows nothing
@@ -63,6 +88,10 @@ class EmptyMode(IOperatingMode):
 
     def __init__(self):
         super(EmptyMode, self).__init__(name = "empty_mode", parameters = {})
+
+    def update_data(self):
+        super(EmptyMode, self).update_data()
+
 
 class GPIOMode(IOperatingMode):
     """ GPIO Mode
@@ -77,6 +106,10 @@ class GPIOMode(IOperatingMode):
                 IOperatingMode.STATUS: 0
             })
 
+    def update_data(self):
+        super(GPIOMode, self).update_data()
+
+
 class GPIOReadMode(IOperatingMode):
     """ GPIO Read Mode
     Allows
@@ -90,19 +123,41 @@ class GPIOReadMode(IOperatingMode):
                 IOperatingMode.STATUS: 0
             })
 
+    def update_data(self):
+        super(GPIOReadMode, self).update_data()
+        result = self.noderef.send_command("/gpio%d" % self.get_parameter(GPIOReadMode.GPIO))
+
+        json.loads(result)
+        oldval = self.get_parameter(IOperatingMode.STATUS)
+        val = 0 #TODO CHANGE TO 0 ELSE NOTHING WORKS
+        if result['status'] == IOperatingMode.HIGH:
+            val = 1
+
+        if  val != oldval:
+            set_parameter(IOperatingMode.STATUS, val)
+
+
 class CompositeMode(IOperatingMode):
     """ Composite Mode
     A container for any number of modes
     can be nested inside other composite modes
     """
+    MODES = 'modes'
 
     def __init__(self):
         super(CompositeMode, self).__init__(name = "composite_mode", parameters = {
-                'modes': []
+                CompositeMode.MODES: []
             })
+
+    def update_data(self):
+        """ Updates data on all submodes """
+        super(CompositeMode, self).update_data()
+        for mode in self.get_parameter(CompositeMode.MODES):
+            mode.update_data()
 
     def add_mode(self, mode):
         """ Adds a mode to this composite mode """
+        mode.set_node_reference(self.noderef)
         self.parameters['modes'].append(mode)
 
     def _modes_to_dict(self):
@@ -134,8 +189,11 @@ class IoTNode(object):
         self.ip = ip
         self.name = name
         self.mode = mode
-
         self.mode.set_node_reference(self)
+
+    def update_data(self):
+        """ Asks current mode to update it's data """
+        self.mode.update_data()
 
     def send_command(self, command):
         """ Send the specified command to this node
@@ -145,7 +203,8 @@ class IoTNode(object):
             /dashboard
             ...
         """
-        conn = httplib.HTTPConnection(str(self.ip), PORT_NUMBER)
+        print "Sending command to %s" % self.ip
+        conn = httplib.HTTPConnection(str(self.ip), IoTNode.PORT_NUMBER)
         conn.request("GET", command)
         response = conn.getresponse()
         return response.read()
@@ -165,17 +224,45 @@ class IoTNode(object):
         return self.values[value_name]
 
 class Scanner(object):
-    ################################################################################
-    # TEST DATA
-    ################################################################################
 
-    def __init__(self, auto_scan = False, init_test = False):
+    def __init__(self, auto_scan = False, init_test = False, start_handler = True):
         self.esplist = {}
+        self.running = False
+        self.handler = None
+        Scanner.notifier = Notifier()
+
         if auto_scan:
             self.run_scan()
 
         if init_test:
             self._create_test_data()
+
+        if start_handler:
+            self.start_handler_thread()
+
+    def handler_thread(self):
+        while self.running:
+            #TODO do stuff like polling the nodes and making notifications
+            sleep(5)
+            self.poll_found_nodes()
+            Scanner.notifier.process_queue()
+            pass
+
+    def stop_handler_thread(self):
+        self.running = False
+
+    def start_handler_thread(self):
+        self.handler = Thread(target = self.handler_thread)
+        self.running = True
+        self.handler.start()
+
+    def poll_found_nodes(self):
+        """ Asks all found nodes for a data update
+        Takes a while, done by the handler thread
+        """
+        for name in self.esplist:
+            print "polling %s" % str(name)
+            self.esplist[name].update_data()
 
     def get_node_map(self):
         return self.esplist
@@ -190,22 +277,22 @@ class Scanner(object):
         self.esplist = {}
 
         gpiomode0 = GPIOMode(2)
-        gpiomode0.set_parameter(IOperatingMode.STATUS, 1)
+        gpiomode0.set_parameter(IOperatingMode.STATUS, 1, notify = False)
         esp0 = IoTNode('192.168.1.14', 'esp0', gpiomode0)
         self.esplist[esp0.name] = esp0
 
         compositemode1 = CompositeMode()
-        gpiomode11 = GPIOMode(1)
-        gpiomode11.set_parameter(IOperatingMode.STATUS, 1)
+        esp1 = IoTNode('192.168.1.74', 'esp1', compositemode1)
+        gpiomode11 = GPIOReadMode(1)
+        gpiomode11.set_parameter(IOperatingMode.STATUS, 1, notify = False)
         compositemode12 = CompositeMode()
+        compositemode1.add_mode(compositemode12)
         gpiomode12 = GPIOMode(2)
-        gpiomode12.set_parameter(IOperatingMode.STATUS, 0)
+        gpiomode12.set_parameter(IOperatingMode.STATUS, 0, notify = False)
         compositemode12.add_mode(gpiomode12)
         sticazzimode1 = IOperatingMode("sticazzi_mode", {'sticazziparams': 42})
         compositemode1.add_mode(gpiomode11)
-        compositemode1.add_mode(compositemode12)
         compositemode1.add_mode(sticazzimode1)
-        esp1 = IoTNode('192.168.1.74', 'esp1', compositemode1)
         self.esplist[esp1.name] = esp1
 
     def get_node_list(self):
@@ -283,7 +370,7 @@ class Scanner(object):
 
         for ip in iplist:
             try:
-                conn = httplib.HTTPConnection(str(ip), PORT_NUMBER, timeout=0.2)
+                conn = httplib.HTTPConnection(str(ip), IoTNode.PORT_NUMBER, timeout=0.2)
                 conn.request("GET", "/scanning/beacon")
                 #TODO fare un POST invece di GET, inviando l'ip del server
                 #TODO l'ip del server dovrebbe corrispondere all'interfaccia corretta... (basta passarlo insieme alla lista (quindi non passare una lista ma un dizionario in cui a ogni interfaccia corrisponde la sua lista di ip))

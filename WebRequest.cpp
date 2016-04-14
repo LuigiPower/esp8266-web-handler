@@ -64,7 +64,7 @@ void WebRequest::sendResponse(String completeResponse)
 
 String WebRequest::createJSONResponse(String type, String value, String stat, String extras)
 {
-    String s = "{ type: \"" + type + "\", status:\"" + stat + "\", value: \"" + value + "\", extras: { " + extras + " } }";
+    String s = "{ 'type': \"" + type + "\", 'status':\"" + stat + "\", 'value': \"" + value + "\", 'extras': { " + extras + " } }";
     return s;
 }
 
