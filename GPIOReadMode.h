@@ -1,12 +1,12 @@
-#ifndef __STARTUPMODE_H__
-#define __STARTUPMODE_H__
+#ifndef __GPIOREADMODE_H__
+#define __GPIOREADMODE_H__
 
 #include "IOperatingMode.h"
-#include "LEDMode.h"
-#include "GPIOReadMode.h"
 
-class StartupMode : public IOperatingMode
+class GPIOReadMode : public IOperatingMode
 {
+  int oldValue = 0;
+
   public:
     virtual void init(IOTNode* node, JsonObject& json_data);
     virtual IOperatingMode* handleRequest(WebRequest* webHandler, String request);

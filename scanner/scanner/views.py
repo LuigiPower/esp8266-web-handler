@@ -1,9 +1,16 @@
 from scanner import app
 from scanner.mongo import get_gcm_list
-from scanner.iotnodes import get_node_list
-from scanner.iotgcm import send_message
+from scanner.mongo import insert_gcm
+from scanner.iotnodes import Scanner
+from scanner.iotnodes import IoTNode
 from flask import request
 from flask import render_template
+import time
+import json
+
+#TODO access to this should be regulated by a mutex semaphore, handler thread needs at least read access...
+iotscanner = Scanner(init_test = True)
+notifier = Notifier()
 
 ################################################################################
 # NETWORK SCAN
@@ -11,13 +18,10 @@ from flask import render_template
 
 @app.route('/init/scan')
 def start_scan():
-    print "Scanning network..."
-    listOfIPs = get_local_ip_list()
-    print "Got interfaces..."
     print "Starting network scan (might take a while)..."
-    esplist = scan_local_ips(listOfIPs)
+    iotscanner.run_scan()
     print "Scan completed."
-    return "OK"
+    return str(esplist)
 
 ################################################################################
 
@@ -26,18 +30,26 @@ def start_scan():
 ################################################################################
 
 @app.route('/')
-def hello_world():
-    #TODO check why iotnodes doesn't keep the variable in memory
-    return render_template('index.html', data=get_node_list())
+def index():
+    return render_template('index.html', data=iotscanner.get_node_list())
 
+################################################################################
+
+################################################################################
+# GCM TEST
 ################################################################################
 
 @app.route('/gcm/testmessage')
 def send_test_message():
     reg_id_list = get_gcm_list()
 
-    send_message(reg_id_list, "HELLO THERE!")
+    notifier.send_message(reg_id_list, {
+            'message': "I'm a GCM message!",
+            'event': "VALUE_CHANGED"
+        })
     return "Test message sent"
+
+################################################################################
 
 @app.route('/node/list', methods=['GET'])
 def show_node_list():
@@ -68,3 +80,21 @@ def remove_registration_id():
     remove_gcm(regid)
     return "Removed registration id %s" % regid
 
+@app.route('/door/test', methods=['GET', 'POST'])
+def doortesting():
+    testdoor()
+    return "ciao"
+
+def testdoor():
+    i = 0
+    while i < 10000:
+        result = send_command("192.168.1.76", "/gpio2")
+        print "pass %d result %s" % (i, str(result))
+        if "HIGH" in result:
+            print "HDFIUOHSAFIODSFAHOF"
+            send_message(get_gcm_list(), "CIAO MAMMA SONO IN TV")
+        #jsonres = json.loads(result)
+        #if jsonres['HIGH']:
+        #    print "HIIIIIIIIIIGH"
+        time.sleep(1)
+        i = i + 1

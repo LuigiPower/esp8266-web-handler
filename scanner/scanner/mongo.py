@@ -2,6 +2,9 @@ from pymongo import MongoClient
 
 ################################################################################
 # MONGO DB INIT
+# TODO if I want an history of values for graphs and such, I need to save all
+# data incoming from nodes into the database for future use.
+# TODO figure out a way to save data efficiently and in a simple-to-use manner
 ################################################################################
 
 mongodb = MongoClient()
