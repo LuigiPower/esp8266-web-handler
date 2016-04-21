@@ -9,19 +9,19 @@ from pymongo import MongoClient
 
 mongodb = MongoClient()
 db = mongodb.net_scanner
-gcm_collection = db.gcm_collection
+gcm_collection = db.gcm_test
 
 def insert_gcm(registration_id):
     print "Inserting GCM %s" % registration_id
     element = {
-            "registration_id": registration_id
+            "_id": registration_id
             }
     gcm_collection.insert_one(element)
 
 def remove_gcm(registration_id):
     print "Removing GCM %s" % registration_id
     element = {
-            "registration_id": registration_id
+            "_id": registration_id
             }
     gcm_collection.delete_one(element)
 
@@ -29,6 +29,7 @@ def get_gcm_list():
     cursor = gcm_collection.find()
     reg_id_list = []
     for regid in cursor:
-        reg_id_list.append(regid['registration_id'])
+        print "Regid is %s" % str(regid)
+        reg_id_list.append(regid['_id'])
 
     return reg_id_list

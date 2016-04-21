@@ -11,7 +11,6 @@ import json
 
 #TODO access to this should be regulated by a mutex semaphore, handler thread needs at least read access...
 iotscanner = Scanner(init_test = True)
-notifier = Notifier()
 
 @app.route('/kill/scanner')
 def kill_scanner():
@@ -49,14 +48,31 @@ def index():
 def send_test_message():
     reg_id_list = get_gcm_list()
 
-    notifier.send_message(reg_id_list, {
-            'message': "I'm a GCM message!",
-            'data': {
-                'event': {
-                    'type': "VALUE_CHANGED"
+    data = {
+        "message": "Cose",
+        "data": {
+            "node": {
+                "ip": "192.168.1.14",
+                "mode": {
+                    "name": "gpio_mode",
+                    "params": {
+                        "gpio": 2,
+                        "status": 1
+                    }
+                },
+                "name": "esp0"
+            },
+            "event": {
+                "type": "VALUE_CHANGED",
+                "mode_name": "gpio_read_mode",
+                "params": ["status"],
+                "oldvalues": [0],
+                "newvalues": [1],
                 }
             }
-        })
+        }
+
+    Scanner.notifier._send_message(reg_id_list, data)
     return "Test message sent"
 
 ################################################################################

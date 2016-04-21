@@ -262,7 +262,8 @@ class Scanner(object):
         """
         for name in self.esplist:
             print "polling %s" % str(name)
-            self.esplist[name].update_data()
+            #TODO decomment this
+            #self.esplist[name].update_data()
 
     def get_node_map(self):
         return self.esplist
