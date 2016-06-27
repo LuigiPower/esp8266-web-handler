@@ -27,7 +27,17 @@ def create_string_response(restype, value, status, extras):
 @pygna.flask.route('/scanning/beacon')
 def beacon():
     print "Received beacon!"
-    return create_string_response("BEACON_RESPONSE", "UP", "OK", "")
+    return create_string_response("BEACON_RESPONSE", "UP", "OK", {
+            'ip': "10.40.0.32",
+            'name': "esp0",
+            'mode': {
+                'name': "gpio_mode",
+                'params': {
+                    'gpio': 2,
+                    'status': 1
+                }
+            }
+        })
 
 @pygna.flask.route('/settings/set/mode/<mode>')
 def set_mode(mode):
@@ -63,4 +73,4 @@ if __name__ == "__main__":
 
     my_name = args.name
 
-    pygna.flask.run(host="0.0.0.0", debug=False)
+    pygna.flask.run(host="10.40.0.32", port=5575, debug=False)
