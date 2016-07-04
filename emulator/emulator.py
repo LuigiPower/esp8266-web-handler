@@ -73,4 +73,4 @@ if __name__ == "__main__":
 
     my_name = args.name
 
-    pygna.flask.run(host="10.40.0.32", port=5575, debug=False)
+    pygna.flask.run(host="0.0.0.0", port=5575, debug=False)
